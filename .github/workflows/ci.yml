@@ -1,0 +1,205 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        cd Backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Run tests
+      run: |
+        cd Backend
+        python -m pytest test_*.py -v --cov=. --cov-report=xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./Backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: FrontEnd/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd FrontEnd
+        npm ci
+    
+    - name: Run tests
+      run: |
+        cd FrontEnd
+        npm test -- --coverage --watchAll=false
+    
+    - name: Build
+      run: |
+        cd FrontEnd
+        npm run build
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./FrontEnd/coverage/lcov.info
+        flags: frontend
+        name: frontend-coverage
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install Python dependencies
+      run: |
+        cd Backend
+        pip install flake8 black isort mypy
+    
+    - name: Lint Python code
+      run: |
+        cd Backend
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        black --check .
+        isort --check-only .
+        mypy . --ignore-missing-imports
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+        cache-dependency-path: FrontEnd/package-lock.json
+    
+    - name: Install Node dependencies
+      run: |
+        cd FrontEnd
+        npm ci
+    
+    - name: Lint JavaScript code
+      run: |
+        cd FrontEnd
+        npm run lint
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        cd Backend
+        pip install bandit safety
+    
+    - name: Security scan
+      run: |
+        cd Backend
+        bandit -r . -f json -o bandit-report.json || true
+        safety check --json --output safety-report.json || true
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          Backend/bandit-report.json
+          Backend/safety-report.json
+
+  build:
+    needs: [test-backend, test-frontend, lint, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+        cache-dependency-path: FrontEnd/package-lock.json
+    
+    - name: Build backend
+      run: |
+        cd Backend
+        pip install -r requirements.txt
+        python -m pytest test_*.py
+    
+    - name: Build frontend
+      run: |
+        cd FrontEnd
+        npm ci
+        npm run build
+    
+    - name: Create release artifacts
+      run: |
+        mkdir -p dist
+        cp -r Backend/* dist/backend/
+        cp -r FrontEnd/dist/* dist/frontend/
+        tar -czf npc-bot-release.tar.gz dist/
+    
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: npc-bot-release
+        path: npc-bot-release.tar.gz 
