@@ -186,7 +186,7 @@ curl -X POST "http://localhost:8000/api/npc" \
 Il database SQLite viene creato automaticamente al primo avvio. Per reimpostare:
 
 ```bash
-rm chat_history.db
+rm database.db
 python api_server.py
 ```
 
@@ -257,7 +257,7 @@ ollama serve
 ```bash
 # Backup e ricreazione
 python import_npcs.py backup
-rm chat_history.db
+rm database.db
 python api_server.py
 ```
 
