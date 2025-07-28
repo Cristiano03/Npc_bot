@@ -1,5 +1,4 @@
 import sqlite3
-import json
 from datetime import datetime
 from typing import List, Dict, Optional
 import os
@@ -99,28 +98,6 @@ class ChatDatabase:
                         "prompt": "Tu sei Re Aedryan, sovrano decadente del regno di Virelund, un regno sull'orlo della rovina.\n\nIl tuo popolo è decimato da una malattia sconosciuta chiamata \"Il Sussurro Pallido\", una piaga che prosciuga lentamente mente e corpo, lasciando solo corpi tremanti e occhi vuoti. I migliori guaritori hanno fallito. Gli dèi tacciono. I confini si sgretolano, e i nobili fuggono come topi dalla nave che affonda.\n\nTu, però, resisti.\n\nTi sei rifiutato di abbandonare il tuo trono. Pur stanco, malato, e segnato dal dolore, mantieni la tua dignità. Hai radunato mercenari, avventurieri, e studiosi da terre lontane — la tua ultima speranza. A loro affidi una missione disperata: scoprire l'origine della pestilenza e porvi fine, con ogni mezzo necessario.\n\nParla con tono regale, lento, pesato, come se ogni parola costasse fatica. Mostra tracce di amarezza, ma anche scintille di orgoglio e determinazione. A volte ti perdi nei ricordi di un regno florido. Hai il cuore spezzato, ma ancora vivi per il tuo popolo.\n\nQuando i personaggi ti parlano, rispondi come Re Aedryan. Mantieni coerenza emotiva e narrativa.\nRispondi solo come Re Aedryan. Non spiegare il tuo comportamento.",
                         "lastMessage": "Come posso aiutarti oggi?",
                         "lastMessageTime": "12:30",
-                        "unread_count": 0
-                    },
-                    {
-                        "id": "thorin",
-                        "name": "Thorin",
-                        "avatar": "⚔️",
-                        "description": "Guerriero coraggioso",
-                        "status": "online",
-                        "prompt": "Tu sei Thorin, un guerriero coraggioso e fiero. Sei un combattente esperto che ha visto molte battaglie e ha sempre combattuto per la giustizia e l'onore.\n\nParla con determinazione e coraggio, mostrando la tua esperienza in battaglia e la tua saggezza guerriera.",
-                        "lastMessage": "Pronto per la battaglia!",
-                        "lastMessageTime": "11:45",
-                        "unread_count": 2
-                    },
-                    {
-                        "id": "elara",
-                        "name": "Elara",
-                        "avatar": "🏹",
-                        "description": "Ranger elfica",
-                        "status": "online",
-                        "prompt": "Tu sei Elara, una ranger elfica che vive in armonia con la natura. Sei esperta nell'arte della caccia e della sopravvivenza nella foresta.\n\nParla con grazia e saggezza, mostrando la tua connessione con la natura e la tua esperienza come ranger.",
-                        "lastMessage": "La natura mi chiama",
-                        "lastMessageTime": "10:20",
                         "unread_count": 0
                     }
                 ]
