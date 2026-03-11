@@ -13,7 +13,6 @@ class ChatDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             
-            # Tabella per gli NPC
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS npcs (
                     id TEXT PRIMARY KEY,
@@ -30,7 +29,6 @@ class ChatDatabase:
                 )
             ''')
             
-            # Tabella per le conversazioni
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS conversations (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,7 +42,6 @@ class ChatDatabase:
                 )
             ''')
             
-            # Tabella per i messaggi
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS messages (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,7 +53,6 @@ class ChatDatabase:
                 )
             ''')
             
-            # Tabella per le sessioni utente
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS user_sessions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,7 +66,6 @@ class ChatDatabase:
                 )
             ''')
             
-            # Indici per migliorare le performance
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_npcs_id ON npcs(id)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_conversations_npc ON conversations(npc_id)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id)')
@@ -79,7 +74,6 @@ class ChatDatabase:
             
             conn.commit()
             
-            # Inizializza gli NPC di default se la tabella è vuota
             self._init_default_npcs()
     
     def _init_default_npcs(self):
@@ -114,7 +108,6 @@ class ChatDatabase:
                 
                 conn.commit()
     
-    # Metodi per gestire gli NPC
     def get_all_npcs(self) -> List[Dict]:
         """Ottiene tutti gli NPC"""
         with sqlite3.connect(self.db_path) as conn:
@@ -220,10 +213,8 @@ class ChatDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             
-            # Elimina le conversazioni dell'NPC
             cursor.execute('DELETE FROM conversations WHERE npc_id = ?', (npc_id,))
             
-            # Elimina l'NPC
             cursor.execute('DELETE FROM npcs WHERE id = ?', (npc_id,))
             
             conn.commit()
@@ -248,7 +239,6 @@ class ChatDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             
-            # Cerca una conversazione esistente
             cursor.execute('''
                 SELECT id FROM conversations 
                 WHERE npc_id = ? AND user_id = ?
@@ -259,14 +249,12 @@ class ChatDatabase:
             
             if result:
                 conversation_id = result[0]
-                # Aggiorna il timestamp di attività
                 cursor.execute('''
                     UPDATE conversations 
                     SET updated_at = CURRENT_TIMESTAMP 
                     WHERE id = ?
                 ''', (conversation_id,))
             else:
-                # Crea una nuova conversazione
                 cursor.execute('''
                     INSERT INTO conversations (npc_id, user_id, title)
                     VALUES (?, ?, ?)

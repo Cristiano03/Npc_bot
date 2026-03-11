@@ -8,6 +8,8 @@ from database import chat_db
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "openhermes"
 
+HSA_OVERRIDE_GFX_VERSION="gfx1032"
+
 class NPCManager:
     def __init__(self):
         pass  # Non serve più caricare da file JSON
